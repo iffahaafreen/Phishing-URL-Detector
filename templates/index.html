@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phishing Website Detector</title>
+    <script>
+        function showResult(data) {
+          document.getElementById("result").style.display = "block";
+          document.getElementById("status").innerText = data.prediction;
+          document.getElementById("confidence").innerText = `${(data.confidence * 100).toFixed(2)}%`;
+          document.getElementById("risk").innerText = data.risk_level;
+          document.getElementById("domain").innerText = data.domain;
+          document.getElementById("issuer").innerText = data.issuer || "Unknown";
+          document.getElementById("certage").innerText = `${data.certificate_age || "N/A"} days`;
+          document.getElementById("domainage").innerText = `${data.domain_age || "N/A"} days`;
+      
+          const flagsEl = document.getElementById("flags");
+          flagsEl.innerHTML = "";
+          data.red_flags.forEach(flag => {
+            const li = document.createElement("li");
+            li.innerText = flag;
+            flagsEl.appendChild(li);
+          });
+      
+          document.getElementById("status").className = data.prediction === "Safe" ? "status-safe" : "status-suspicious";
+        }
+    </script>      
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;               /* ensure some breathing room on small screens */
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 2rem;               /* use rems for relative sizing */
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 480px;
+            width: 100%;                 /* fluid width */
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+            /* make headings scale down on small screens */
+        h1 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+            /* fluid input & button sizing */
+        input[type="text"] {
+            width: 100%;                 /* fill container */
+            max-width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;                 /* full‑width on mobile */
+            max-width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+            /* result box fluid typography */
+        .result {
+            margin-top: 2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            text-align: left;            /* left‑align for readability */
+        }
+
+            /* status card */
+        .result-box {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-left: 5px solid #28a745;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            margin-top: 1.5rem;
+        }
+        .safe {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .phishing {
+            color: #dc3545;
+            font-weight: bold;
+        }
+            /* responsive font‑size adjustments */
+        @media (max-width: 360px) {
+            h1 { font-size: 1.5rem; }
+            .result { font-size: 0.9rem; }
+            input[type="text"], button { font-size: 0.9rem; padding: 0.6rem; }
+        }
+            /* adjust container padding on large screens */
+        @media (min-width: 768px) {
+            .container { padding: 3rem; }
+            h1 { font-size: 2rem; }
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Website Detector</h1>
+        <form action="/predict" method="post">
+            <input type="text" name="url" placeholder="Enter a website URL (e.g. https://example.com)" required>
+            <br>
+            <button type="submit">Analyze</button>
+        </form>
+        {% if prediction %}
+            {% set color = 'safe' if prediction == '🟢Safe' else 'phishing' %}
+            <div class="result">
+                <div><strong>URL:</strong> {{ url }}</div>
+                <!-- Add this within the HTML where you'd like to show the details -->
+                <h3>Prediction: <span class="{{ color }}">{{ prediction }}</span></h3>
+                <h4>Domain Info:</h4>
+                    <p>Domain: {{ domain }}</p>
+                    <p>Issuer: {{ issuer }}</p>
+                    <p>Certificate Age: {{ cert_age }} days</p>
+                    <p>Domain Age: {{ domain_age }} days</p>
+        {% endif %}
+            </div>
+</body>
+</html>
